@@ -1,7 +1,8 @@
 import React from "react";
-import { BrowserRouter } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Layout from "./pages/Layout";
 import ListPage from "./pages/ListPage";
+import DetailPage from "./pages/DetailPage";
 
 function App() {
   return (
