@@ -1,8 +1,8 @@
 import { createContext, useContext, useState } from "react";
-import { Issue } from "../types/issue";
+import { IssueList } from "../types/issue";
 
 type IssueState = {
-  data: Issue | null;
+  data: IssueList | null;
   loading: boolean;
   error: any;
 };

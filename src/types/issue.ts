@@ -47,3 +47,5 @@ export interface Issue {
   performed_via_github_app: object;
   state_reason: object;
 }
+
+export type IssueList = Issue[];
