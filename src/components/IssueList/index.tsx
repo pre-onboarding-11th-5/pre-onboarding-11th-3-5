@@ -21,7 +21,7 @@ function IssueList() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (dispatch && pageEnd.current) {
+    if (!error && dispatch && pageEnd.current) {
       const observer = new IntersectionObserver((entries) => {
         entries.forEach(
           (entry) => {
@@ -38,25 +38,29 @@ function IssueList() {
 
   return (
     <Container>
-      {data?.map((issue, index) => (
-        <section key={issue?.number}>
-          <List
-            style={{
-              borderBottom: (index + 1) % 4 === 0 ? "0px" : "1px solid gray",
-            }}
-            onClick={() => navigate(`/${issue?.number}`)}
-          >
-            <IssueItem
-              comments={issue?.comments}
-              title={issue?.title}
-              createdAt={issue?.created_at}
-              login={issue?.user?.login}
-              number={issue?.number}
-            />
-          </List>
-          {(index + 1) % 4 === 0 && <Advertisement />}
-        </section>
-      ))}
+      {error ? (
+        <div>Error</div>
+      ) : (
+        data?.map((issue, index) => (
+          <section key={issue?.number}>
+            <List
+              style={{
+                borderBottom: (index + 1) % 4 === 0 ? "0px" : "1px solid gray",
+              }}
+              onClick={() => navigate(`/${issue?.number}`)}
+            >
+              <IssueItem
+                comments={issue?.comments}
+                title={issue?.title}
+                createdAt={issue?.created_at}
+                login={issue?.user?.login}
+                number={issue?.number}
+              />
+            </List>
+            {(index + 1) % 4 === 0 && <Advertisement />}
+          </section>
+        ))
+      )}
       {loading ? <Loading /> : <div ref={pageEnd} />}
     </Container>
   );
