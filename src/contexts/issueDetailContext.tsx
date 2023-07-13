@@ -84,7 +84,7 @@ const IssueDetailProvider: React.FC<React.PropsWithChildren> = ({
   }, [state]);
 
   useEffect(() => {
-    if (!data) fetchIssueDetail();
+    if (!data.data) fetchIssueDetail();
   }, [fetchIssueDetail, data]);
 
   return (
