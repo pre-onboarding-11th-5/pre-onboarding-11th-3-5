@@ -38,13 +38,13 @@ export const useIssueDetailDispatch = () => {
 const IssueDetailProvider: React.FC<React.PropsWithChildren> = ({
   children,
 }) => {
+  const { state: issue } = useLocation();
   const [data, setData] = useState<IssueDetailState>({
-    data: null,
+    data: issue,
     loading: true,
     error: null,
   });
   const { id } = useParams();
-  const { state } = useLocation();
 
   const fetchIssueDetail = useCallback(async () => {
     if (!id || isNaN(parseInt(id))) {
@@ -75,17 +75,10 @@ const IssueDetailProvider: React.FC<React.PropsWithChildren> = ({
       setData((prev) => ({ ...prev, loading: false }));
     }
   }, [id]);
-  const setIssueDetail = (data: Issue) => {
-    setData((prev) => ({ ...prev, loading: false, data }));
-  };
-
-  useEffect(() => {
-    setIssueDetail(state);
-  }, [state]);
 
   useEffect(() => {
     if (!data.data) fetchIssueDetail();
-  }, [fetchIssueDetail, data]);
+  }, [fetchIssueDetail, data.data]);
 
   return (
     <IssueDetailStateContext.Provider value={data}>
