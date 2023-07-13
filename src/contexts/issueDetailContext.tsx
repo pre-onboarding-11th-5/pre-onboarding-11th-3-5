@@ -41,7 +41,7 @@ const IssueDetailProvider: React.FC<React.PropsWithChildren> = ({
   const { state: issue } = useLocation();
   const [data, setData] = useState<IssueDetailState>({
     data: issue,
-    loading: true,
+    loading: !issue,
     error: null,
   });
   const { id } = useParams();
