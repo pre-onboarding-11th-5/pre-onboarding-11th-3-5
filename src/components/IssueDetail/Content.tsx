@@ -1,4 +1,5 @@
 import { ReactMarkdown } from "react-markdown/lib/react-markdown";
+import rehypeRaw from "rehype-raw";
 import remarkGfm from "remark-gfm";
 import { styled } from "styled-components";
 
@@ -29,7 +30,11 @@ const Layout = styled.div`
 function Content({ body }: { body: string }) {
   return (
     <Layout>
-      <ReactMarkdown rawSourcePos remarkPlugins={[remarkGfm]}>
+      <ReactMarkdown
+        rawSourcePos
+        rehypePlugins={[rehypeRaw]}
+        remarkPlugins={[remarkGfm]}
+      >
         {body}
       </ReactMarkdown>
     </Layout>
