@@ -34,7 +34,7 @@ function IssueList() {
       });
       observer.observe(pageEnd.current);
     }
-  }, [dispatch, pageEnd, data, error, loading]);
+  }, [dispatch, error, loading]);
 
   return (
     <Container>
