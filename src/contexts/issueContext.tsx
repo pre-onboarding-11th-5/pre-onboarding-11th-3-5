@@ -1,36 +1,93 @@
-import { createContext, useContext, useState } from "react";
-import { IssueList } from "../types/issue";
+import { createContext, useContext, useEffect, useState } from "react";
+import type { IssueList } from "../types/issue";
+import { getIssueList } from "../apis/getIssueList";
+import { isAxiosError } from "axios";
+import type { ErrorResponse } from "../types/error";
 
 type IssueState = {
-  data: IssueList | null;
+  data: IssueList;
   loading: boolean;
-  error: any;
+  error: {
+    message: string;
+  } | null;
+  currentPage: number;
+  hasNextPage: boolean;
 };
 
-const IssueStateContext = createContext<IssueState | null>(null);
-const IssueDispatchContext = createContext<React.Dispatch<
-  React.SetStateAction<IssueState>
-> | null>(null);
+const IssueListStateContext = createContext<IssueState | null>(null);
+const IssueListDispatchContext = createContext<(() => void) | null>(null);
 
-export const useIssue = () => useContext(IssueStateContext);
-export const useIssueDispatch = () => useContext(IssueDispatchContext);
+export const useIssueList = () => {
+  const issueState = useContext(IssueListStateContext);
+  if (!issueState) throw new Error("Cannot find IssueProvider");
+  return issueState;
+};
+export const useIssueListDispatch = () => {
+  const issueDispatch = useContext(IssueListDispatchContext);
+  if (!issueDispatch) throw new Error("Cannot find IssueProvider");
+  return issueDispatch;
+};
 
 const IssueProvider: React.FC<React.PropsWithChildren> = ({ children }) => {
   const [data, setData] = useState<IssueState>({
-    data: null,
+    data: [],
     loading: true,
     error: null,
+    currentPage: 0,
+    hasNextPage: true,
   });
 
-  const dispatchIssue = async () => {
-    // fetch data
+  const dispatchIssueList = async (page: number) => {
+    try {
+      setData((prev) => ({ ...prev, loading: true, error: null }));
+
+      const { data } = await getIssueList(page);
+
+      setData((prev) => {
+        if (prev.currentPage === page) return prev;
+        return {
+          ...prev,
+          data: [...prev.data, ...data],
+          currentPage: page,
+          hasNextPage: data.length === 30,
+        };
+      });
+    } catch (e) {
+      if (isAxiosError<ErrorResponse>(e) && e.response) {
+        const {
+          data: { message },
+        } = e.response;
+        setData((prev) => ({
+          ...prev,
+          error: { message },
+        }));
+      } else if (isAxiosError(e)) {
+        const { message } = e;
+        setData((prev) => ({
+          ...prev,
+          error: { message },
+        }));
+      }
+    } finally {
+      setData((prev) => ({ ...prev, loading: false }));
+    }
   };
+
+  const fetchNextPage = () => {
+    if (data.loading || !data.hasNextPage) return;
+    dispatchIssueList(data.currentPage + 1);
+  };
+
+  useEffect(() => {
+    dispatchIssueList(1);
+  }, []);
+
   return (
-    <IssueStateContext.Provider value={data}>
-      <IssueDispatchContext.Provider value={dispatchIssue}>
+    <IssueListStateContext.Provider value={data}>
+      <IssueListDispatchContext.Provider value={fetchNextPage}>
         {children}
-      </IssueDispatchContext.Provider>
-    </IssueStateContext.Provider>
+      </IssueListDispatchContext.Provider>
+    </IssueListStateContext.Provider>
   );
 };
 
