@@ -6,7 +6,7 @@ import {
   useState,
 } from "react";
 import type { Issue } from "../types/issue";
-import { useParams } from "react-router-dom";
+import { useLocation, useParams } from "react-router-dom";
 import { getIssue } from "../apis/getIssue";
 import { isAxiosError } from "axios";
 import type { ErrorResponse } from "../types/error";
@@ -38,8 +38,9 @@ export const useIssueDetailDispatch = () => {
 const IssueDetailProvider: React.FC<React.PropsWithChildren> = ({
   children,
 }) => {
+  const { state: issue } = useLocation();
   const [data, setData] = useState<IssueDetailState>({
-    data: null,
+    data: issue,
     loading: true,
     error: null,
   });
@@ -76,8 +77,8 @@ const IssueDetailProvider: React.FC<React.PropsWithChildren> = ({
   }, [id]);
 
   useEffect(() => {
-    fetchIssueDetail();
-  }, [fetchIssueDetail]);
+    if (!data.data) fetchIssueDetail();
+  }, [fetchIssueDetail, data.data]);
 
   return (
     <IssueDetailStateContext.Provider value={data}>
