@@ -6,7 +6,7 @@ import {
   useState,
 } from "react";
 import type { Issue } from "../types/issue";
-import { useParams } from "react-router-dom";
+import { useLocation, useParams } from "react-router-dom";
 import { getIssue } from "../apis/getIssue";
 import { isAxiosError } from "axios";
 import type { ErrorResponse } from "../types/error";
@@ -23,7 +23,6 @@ const IssueDetailStateContext = createContext<IssueDetailState | null>(null);
 const IssueDetailDispatchContext = createContext<(() => Promise<void>) | null>(
   null,
 );
-const IssueDetailSet = createContext<((data: Issue) => void) | null>(null);
 
 export const useIssueDetail = () => {
   const issueDetailState = useContext(IssueDetailStateContext);
@@ -36,12 +35,6 @@ export const useIssueDetailDispatch = () => {
   return issueDetailDispatch;
 };
 
-export const useSetIssueDetail = () => {
-  const setIssueDetail = useContext(IssueDetailSet);
-  if (!setIssueDetail) throw new Error("Cannot find IssueProvider");
-  return setIssueDetail;
-};
-
 const IssueDetailProvider: React.FC<React.PropsWithChildren> = ({
   children,
 }) => {
@@ -51,6 +44,7 @@ const IssueDetailProvider: React.FC<React.PropsWithChildren> = ({
     error: null,
   });
   const { id } = useParams();
+  const { state } = useLocation();
 
   const fetchIssueDetail = useCallback(async () => {
     if (!id || isNaN(parseInt(id))) {
@@ -84,16 +78,19 @@ const IssueDetailProvider: React.FC<React.PropsWithChildren> = ({
   const setIssueDetail = (data: Issue) => {
     setData((prev) => ({ ...prev, loading: false, data }));
   };
+
+  useEffect(() => {
+    setIssueDetail(state);
+  }, [state]);
+
   useEffect(() => {
     if (!data) fetchIssueDetail();
-  }, [fetchIssueDetail]);
+  }, [fetchIssueDetail, data]);
 
   return (
     <IssueDetailStateContext.Provider value={data}>
       <IssueDetailDispatchContext.Provider value={fetchIssueDetail}>
-        <IssueDetailSet.Provider value={setIssueDetail}>
-          {children}
-        </IssueDetailSet.Provider>
+        {children}
       </IssueDetailDispatchContext.Provider>
     </IssueDetailStateContext.Provider>
   );
