@@ -17,34 +17,29 @@ function IssueList() {
 
   return (
     <IssueListBox>
-      {data.flatMap(
-        (
-          { number, comments, title, user: { login, avatar_url }, created_at },
-          index,
-        ) => {
-          const nodes = [
-            <li key={number}>
-              <Link to={`/${number}`}>
-                <IssueItem
-                  comments={comments}
-                  number={number}
-                  title={title}
-                  created_at={created_at}
-                  login={login}
-                />
-              </Link>
+      {data.flatMap((issue, index) => {
+        const nodes = [
+          <li key={issue.number}>
+            <Link to={`/${issue.number}`} state={issue}>
+              <IssueItem
+                comments={issue.comments}
+                number={issue.number}
+                title={issue.title}
+                created_at={issue.created_at}
+                login={issue.user.login}
+              />
+            </Link>
+          </li>,
+        ];
+        const isAdvertisement = (index + 1) % 4 === 0;
+        isAdvertisement &&
+          nodes.push(
+            <li key={`ad#${index}`}>
+              <Advertisement />
             </li>,
-          ];
-          const isAdvertisement = (index + 1) % 4 === 0;
-          isAdvertisement &&
-            nodes.push(
-              <li key={`ad#${index}`}>
-                <Advertisement />
-              </li>,
-            );
-          return nodes;
-        },
-      )}
+          );
+        return nodes;
+      })}
       <div ref={hasNextPage && !error ? observeTargetRef : null}></div>
       <Error error={error} refetch={fetchNextPage} />
       <Loading loading={loading} />

@@ -23,6 +23,7 @@ const IssueDetailStateContext = createContext<IssueDetailState | null>(null);
 const IssueDetailDispatchContext = createContext<(() => Promise<void>) | null>(
   null,
 );
+const IssueDetailSet = createContext<((data: Issue) => void) | null>(null);
 
 export const useIssueDetail = () => {
   const issueDetailState = useContext(IssueDetailStateContext);
@@ -33,6 +34,12 @@ export const useIssueDetailDispatch = () => {
   const issueDetailDispatch = useContext(IssueDetailDispatchContext);
   if (!issueDetailDispatch) throw new Error("Cannot find IssueProvider");
   return issueDetailDispatch;
+};
+
+export const useSetIssueDetail = () => {
+  const setIssueDetail = useContext(IssueDetailSet);
+  if (!setIssueDetail) throw new Error("Cannot find IssueProvider");
+  return setIssueDetail;
 };
 
 const IssueDetailProvider: React.FC<React.PropsWithChildren> = ({
@@ -74,15 +81,19 @@ const IssueDetailProvider: React.FC<React.PropsWithChildren> = ({
       setData((prev) => ({ ...prev, loading: false }));
     }
   }, [id]);
-
+  const setIssueDetail = (data: Issue) => {
+    setData((prev) => ({ ...prev, loading: false, data }));
+  };
   useEffect(() => {
-    fetchIssueDetail();
+    if (!data) fetchIssueDetail();
   }, [fetchIssueDetail]);
 
   return (
     <IssueDetailStateContext.Provider value={data}>
       <IssueDetailDispatchContext.Provider value={fetchIssueDetail}>
-        {children}
+        <IssueDetailSet.Provider value={setIssueDetail}>
+          {children}
+        </IssueDetailSet.Provider>
       </IssueDetailDispatchContext.Provider>
     </IssueDetailStateContext.Provider>
   );
