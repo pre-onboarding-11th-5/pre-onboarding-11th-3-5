@@ -4,7 +4,6 @@ import IssueItem from "../common/IssueItem";
 function IssueDetail() {
   return (
     <div>
-      <IssueItem isAvatar />
       <Content />
     </div>
   );
