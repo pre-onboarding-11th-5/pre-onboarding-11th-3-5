@@ -1,3 +1,4 @@
+import React from "react";
 import type { Issue } from "../../../types/issue";
 import {
   IssueItemAvatar,
@@ -42,4 +43,4 @@ const IssueItem: React.FC<IssueItemProps> = ({
   );
 };
 
-export default IssueItem;
+export default React.memo(IssueItem);
