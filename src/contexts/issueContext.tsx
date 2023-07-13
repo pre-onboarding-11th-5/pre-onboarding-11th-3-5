@@ -1,36 +1,100 @@
-import { createContext, useContext, useState } from "react";
-import { IssueList } from "../types/issue";
+import { createContext, useCallback, useContext, useState } from "react";
+import { Issue, IssueList } from "../types/issue";
+import { getIssue, getIssueList } from "../apis/getIssueLists";
 
-type IssueState = {
-  data: IssueList | null;
+type IssuesState = {
   loading: boolean;
+  data: IssueList | null;
   error: any;
 };
 
-const IssueStateContext = createContext<IssueState | null>(null);
-const IssueDispatchContext = createContext<React.Dispatch<
-  React.SetStateAction<IssueState>
-> | null>(null);
+type IssueState = {
+  loading: boolean;
+  data: Issue | null;
+  error: any;
+};
 
-export const useIssue = () => useContext(IssueStateContext);
-export const useIssueDispatch = () => useContext(IssueDispatchContext);
+const IssuesStateContext = createContext<IssuesState>({
+  loading: false,
+  data: null,
+  error: null,
+});
+const IssueStateContext = createContext<IssueState>({
+  loading: false,
+  data: null,
+  error: null,
+});
+
+const IssueDispatchContext = createContext<React.SetStateAction<any>>(null);
+
+export const useIssues = () => {
+  const state = useContext(IssuesStateContext);
+  if (!state) {
+    throw new Error("Error");
+  }
+  return state;
+};
+export const useIssue = () => {
+  const state = useContext(IssueStateContext);
+  if (!state) {
+    throw new Error("Error");
+  }
+  return state;
+};
+export const useIssueDispatch = () => {
+  const dispatch = useContext(IssueDispatchContext);
+  if (!dispatch) {
+    throw new Error("Error");
+  }
+  return dispatch;
+};
 
 const IssueProvider: React.FC<React.PropsWithChildren> = ({ children }) => {
-  const [data, setData] = useState<IssueState>({
+  const [issues, setIssues] = useState<IssuesState>({
+    loading: false,
     data: null,
-    loading: true,
+    error: null,
+  });
+  const [issue, setIssue] = useState<IssueState>({
+    loading: false,
+    data: null,
     error: null,
   });
 
-  const dispatchIssue = async () => {
-    // fetch data
+  const dispatchIssues = async (page: number) => {
+    setIssues((prev) => ({ ...prev, loading: true }));
+    try {
+      const data = await getIssueList({ per_page: 10, page, sort: "comments" });
+      setIssues((prev) => ({
+        ...prev,
+        loading: false,
+        data: prev.data ? [...prev.data, ...data] : [...data],
+      }));
+    } catch (e) {
+      setIssues((prev) => ({ ...prev, loading: false, error: e }));
+    }
   };
+
+  const dispatchIssue = async (id: number) => {
+    setIssue((prev) => ({ ...prev, loading: true }));
+    try {
+      const data = await getIssue(id);
+      setIssue((prev) => ({ ...prev, loading: false, data }));
+    } catch (e) {
+      setIssue((prev) => ({ ...prev, error: e }));
+    }
+  };
+  const fetchIssues = useCallback((page: number) => dispatchIssues(page), []);
+  const fetchIssue = useCallback((id: number) => dispatchIssue(id), []);
+
   return (
-    <IssueStateContext.Provider value={data}>
-      <IssueDispatchContext.Provider value={dispatchIssue}>
-        {children}
-      </IssueDispatchContext.Provider>
-    </IssueStateContext.Provider>
+    <IssuesStateContext.Provider value={issues}>
+      <IssueStateContext.Provider value={issue}>
+        <IssueDispatchContext.Provider value={{ fetchIssues, fetchIssue }}>
+          {children}
+        </IssueDispatchContext.Provider>
+      </IssueStateContext.Provider>
+    </IssuesStateContext.Provider>
   );
 };
 
