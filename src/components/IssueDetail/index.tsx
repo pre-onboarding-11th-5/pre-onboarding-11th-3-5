@@ -7,8 +7,10 @@ import {
 import Loading from "../common/Loading";
 import Error from "../common/Error";
 import { IssueDetailBox } from "./IssueDetail.styles";
+import useScrollToTop from "../../hooks/useScrollToTop";
 
 function IssueDetail() {
+  useScrollToTop();
   const { data, error, loading } = useIssueDetail();
   const fetchIssueDetail = useIssueDetailDispatch();
 
