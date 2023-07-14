@@ -83,17 +83,15 @@ src
 
 ### 3. useInfiniteIssue
 
-![image](https://github.com/pre-onboarding-11th-5/pre-onboarding-11th-3-5/assets/68717963/01618143-d49c-4da0-923b-a44b9f6afdaf)
+<img src="https://github.com/pre-onboarding-11th-5/pre-onboarding-11th-3-5/assets/68717963/01618143-d49c-4da0-923b-a44b9f6afdaf" width="480px" />
 
 ### 4. Issue 컴포넌트 react.memo 최적화
 
 > #### 적용 전
->
-> ![meme-적용-전](https://github.com/pre-onboarding-11th-5/pre-onboarding-11th-3-5/assets/68717963/ce2cf140-1b2d-45f5-89f0-e37dcdd4fae4)
+> <img src="https://github.com/pre-onboarding-11th-5/pre-onboarding-11th-3-5/assets/68717963/ce2cf140-1b2d-45f5-89f0-e37dcdd4fae4" width="450px" />
 
 > #### 적용 후
->
-> ![memo-적용-후](https://github.com/pre-onboarding-11th-5/pre-onboarding-11th-3-5/assets/68717963/61c1128e-3ccb-4b97-9e83-398d28254b05)
+> <img src="https://github.com/pre-onboarding-11th-5/pre-onboarding-11th-3-5/assets/68717963/61c1128e-3ccb-4b97-9e83-398d28254b05" width="450px" />
 
 ### 5. link state로 api 호출 최적화
 
@@ -195,12 +193,10 @@ const IssueDetailProvider: React.FC<React.PropsWithChildren> = ({
 ### 6. avatar 이미 layout shift
 
 > #### 적용 전
->
-> ![적용-전](https://github.com/pre-onboarding-11th-5/pre-onboarding-11th-3-5/assets/68717963/6eae8d28-86f4-410a-8ba7-59625608b53c)
+> <img src="https://github.com/pre-onboarding-11th-5/pre-onboarding-11th-3-5/assets/68717963/6eae8d28-86f4-410a-8ba7-59625608b53c" width="450px" />
 
 > #### 적용 후
->
-> ![적용-후](https://github.com/pre-onboarding-11th-5/pre-onboarding-11th-3-5/assets/68717963/804356fa-b0ea-4df9-8eda-be07ba9dabff)
+> <img src="https://github.com/pre-onboarding-11th-5/pre-onboarding-11th-3-5/assets/68717963/804356fa-b0ea-4df9-8eda-be07ba9dabff" width="450px" />
 
 <br><br>
 
