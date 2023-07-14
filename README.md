@@ -88,114 +88,122 @@ src
 ### 4. Issue 컴포넌트 react.memo 최적화
 
 > #### 적용 전
+>
 > <img src="https://github.com/pre-onboarding-11th-5/pre-onboarding-11th-3-5/assets/68717963/ce2cf140-1b2d-45f5-89f0-e37dcdd4fae4" width="450px" />
 
 > #### 적용 후
+>
 > <img src="https://github.com/pre-onboarding-11th-5/pre-onboarding-11th-3-5/assets/68717963/61c1128e-3ccb-4b97-9e83-398d28254b05" width="450px" />
 
 ### 5. link state로 api 호출 최적화
 
-```
-function IssueList() {
-  const { data, error, loading, hasNextPage } = useIssueList();
-  const fetchNextPage = useIssueListDispatch();
-  const observeTargetRef = useInfiniteIssue<HTMLDivElement>();
+> 코드
+>
+> ```
+> function IssueList() {
+>  const { data, error, loading, hasNextPage } = useIssueList();
+>  const fetchNextPage = useIssueListDispatch();
+>  const observeTargetRef = useInfiniteIssue<HTMLDivElement>();
+>
+> return (
+>    <IssueListBox>
+>      {data.flatMap((issue, index) => {
+>        const nodes = [
+>          <li key={issue.number}>
+>            <Link to={`/${issue.number}`} state={issue}>
+>              <IssueItem
+>                comments={issue.comments}
+>                number={issue.number}
+>                title={issue.title}
+>                created_at={issue.created_at}
+>                login={issue.user.login}
+>              />
+>            </Link>
+>          </li>,
+>        ];
+>        const isAdvertisement = (index + 1) % 4 === 0;
+>        isAdvertisement &&
+>          nodes.push(
+>            <li key={`ad#${index}`}>
+>              <Advertisement />
+>            </li>,
+>          );
+>        return nodes;
+>      })}
+>      <div ref={hasNextPage && !error ? observeTargetRef : null}></div>
+>      <Error error={error} refetch={fetchNextPage} />
+>      <Loading loading={loading} />
+>    </IssueListBox>
+>  );
+> }
+> ```
+>
+> ```
+> const IssueDetailProvider: React.FC<React.PropsWithChildren> = ({
+>  children,
+> }) => {
+>  const { state: issue } = useLocation();
+>  const [data, setData] = useState<IssueDetailState>({
+>    data: issue,
+>    loading: issue ? false : true,
+>    error: null,
+>  });
+>  const { id } = useParams();
+>
+>  const fetchIssueDetail = useCallback(async () => {
+>    if (!id || isNaN(parseInt(id))) {
+>      setData((prev) => ({ ...prev, error: { message: "Invalid id" } }));
+>      return;
+>    }
+>    try {
+>      setData((prev) => ({ ...prev, loading: true, error: null }));
+>      const { data } = await getIssue(parseInt(id));
+>      setData((prev) => ({ ...prev, data }));
+>    } catch (e) {
+>      if (isAxiosError<ErrorResponse>(e) && e.response) {
+>        const {
+>          data: { message },
+>        } = e.response;
+>        setData((prev) => ({
+>          ...prev,
+>          error: { message },
+>        }));
+>      } else if (isAxiosError(e)) {
+>        const { message } = e;
+>        setData((prev) => ({
+>          ...prev,
+>          error: { message },
+>        }));
+>      }
+>    } finally {
+>      setData((prev) => ({ ...prev, loading: false }));
+>    }
+>  }, [id]);
+>
+>  useEffect(() => {
+>    if (!data.data) fetchIssueDetail();
+>  }, [fetchIssueDetail, data.data]);
+>
+>  return (
+>    <IssueDetailStateContext.Provider value={data}>
+>      <IssueDetailDispatchContext.Provider value={fetchIssueDetail}>
+>        {children}
+>      </IssueDetailDispatchContext.Provider>
+>    </IssueDetailStateContext.Provider>
+>  );
+> };
+> ```
 
-  return (
-    <IssueListBox>
-      {data.flatMap((issue, index) => {
-        const nodes = [
-          <li key={issue.number}>
-            <Link to={`/${issue.number}`} state={issue}>
-              <IssueItem
-                comments={issue.comments}
-                number={issue.number}
-                title={issue.title}
-                created_at={issue.created_at}
-                login={issue.user.login}
-              />
-            </Link>
-          </li>,
-        ];
-        const isAdvertisement = (index + 1) % 4 === 0;
-        isAdvertisement &&
-          nodes.push(
-            <li key={`ad#${index}`}>
-              <Advertisement />
-            </li>,
-          );
-        return nodes;
-      })}
-      <div ref={hasNextPage && !error ? observeTargetRef : null}></div>
-      <Error error={error} refetch={fetchNextPage} />
-      <Loading loading={loading} />
-    </IssueListBox>
-  );
-}
-```
-
-```
-const IssueDetailProvider: React.FC<React.PropsWithChildren> = ({
-  children,
-}) => {
-  const { state: issue } = useLocation();
-  const [data, setData] = useState<IssueDetailState>({
-    data: issue,
-    loading: issue ? false : true,
-    error: null,
-  });
-  const { id } = useParams();
-
-  const fetchIssueDetail = useCallback(async () => {
-    if (!id || isNaN(parseInt(id))) {
-      setData((prev) => ({ ...prev, error: { message: "Invalid id" } }));
-      return;
-    }
-    try {
-      setData((prev) => ({ ...prev, loading: true, error: null }));
-      const { data } = await getIssue(parseInt(id));
-      setData((prev) => ({ ...prev, data }));
-    } catch (e) {
-      if (isAxiosError<ErrorResponse>(e) && e.response) {
-        const {
-          data: { message },
-        } = e.response;
-        setData((prev) => ({
-          ...prev,
-          error: { message },
-        }));
-      } else if (isAxiosError(e)) {
-        const { message } = e;
-        setData((prev) => ({
-          ...prev,
-          error: { message },
-        }));
-      }
-    } finally {
-      setData((prev) => ({ ...prev, loading: false }));
-    }
-  }, [id]);
-
-  useEffect(() => {
-    if (!data.data) fetchIssueDetail();
-  }, [fetchIssueDetail, data.data]);
-
-  return (
-    <IssueDetailStateContext.Provider value={data}>
-      <IssueDetailDispatchContext.Provider value={fetchIssueDetail}>
-        {children}
-      </IssueDetailDispatchContext.Provider>
-    </IssueDetailStateContext.Provider>
-  );
-};
-```
+> 결과<br> <img src="https://github.com/pre-onboarding-11th-5/pre-onboarding-11th-3-5/assets/68717963/8808aa99-f3b6-4c23-9373-ef4a1788e7c8" width="700px" />
 
 ### 6. avatar 이미 layout shift
 
 > #### 적용 전
+>
 > <img src="https://github.com/pre-onboarding-11th-5/pre-onboarding-11th-3-5/assets/68717963/6eae8d28-86f4-410a-8ba7-59625608b53c" width="450px" />
 
 > #### 적용 후
+>
 > <img src="https://github.com/pre-onboarding-11th-5/pre-onboarding-11th-3-5/assets/68717963/804356fa-b0ea-4df9-8eda-be07ba9dabff" width="450px" />
 
 <br><br>
